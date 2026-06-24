@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nossa História</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root { --slide-h: 100dvh; --font: 'Inter', system-ui, sans-serif; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Caveat:wght@500&display=swap');
+  html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:var(--font); user-select:none; }
+
+  #slides { display:flex; flex-direction:row; transition:transform 0.55s cubic-bezier(0.77,0,0.18,1); will-change:transform; }
+  .slide { width:100vw; height:var(--slide-h); flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; position:relative; padding:2rem 1.5rem; }
+
+  #progress-bar { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; gap:5px; padding:12px 16px 8px; }
+  .pb-seg { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.25); overflow:hidden; }
+  .pb-seg-inner { height:100%; background:#fff; width:0%; border-radius:2px; /* sem transition aqui — o JS controla */ }
+
+  #tap-left, #tap-right { position:fixed; top:0; bottom:0; width:40%; z-index:50; }
+  #tap-left { left:0; } #tap-right { right:0; }
+
+  /* SLIDE 1 */
+  .s1-bg { background: radial-gradient(ellipse at 30% 40%, #6c2bd9 0%, #0a0a0a 65%), radial-gradient(ellipse at 75% 70%, #c0236e 0%, transparent 55%); }
+  .s1-eyebrow { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-bottom:1rem; }
+  .s1-title { font-size:42px; font-weight:900; color:#fff; text-align:center; line-height:1.05; margin-bottom:0.4rem; }
+  .s1-subtitle { font-size:42px; font-weight:900; text-align:center; line-height:1.05; background:linear-gradient(90deg,#c86dd7,#ff6bb5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:2.5rem; }
+  .s1-names { font-size:16px; color:rgba(255,255,255,0.7); letter-spacing:0.08em; margin-bottom:2.5rem; }
+  .s1-hint { font-size:12px; color:rgba(255,255,255,0.35); display:flex; align-items:center; gap:6px; margin-top:auto; padding-bottom:env(safe-area-inset-bottom); }
+  .s1-hint::after { content:''; display:inline-block; width:18px; height:2px; background:rgba(255,255,255,0.35); border-radius:1px; }
+
+  /* POLAROID */
+  .polaroid { background:#f5f0e8; padding:10px 10px 32px 10px; box-shadow:0 8px 32px rgba(0,0,0,0.5),0 2px 8px rgba(0,0,0,0.3); display:inline-block; position:relative; }
+  .polaroid img { display:block; object-fit:cover; }
+
+  /* SLIDE 2 */
+  .s2-bg { background: radial-gradient(ellipse at 60% 30%, #1a5c38 0%, #0a0a0a 65%), radial-gradient(ellipse at 20% 80%, #0d3d59 0%, transparent 55%); }
+  .s2-label { font-size:13px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:0.8rem; }
+  .s2-count { font-size:88px; font-weight:900; color:#1db954; line-height:0.9; letter-spacing:-4px; margin-bottom:0.4rem; }
+  .s2-unit { font-size:22px; font-weight:600; color:rgba(255,255,255,0.8); margin-bottom:1.8rem; }
+  .s2-since { font-size:14px; color:rgba(255,255,255,0.45); margin-bottom:2rem; }
+
+  /* SLIDE 3 */
+  .s3-bg { background: radial-gradient(ellipse at 50% 20%, #7c2d92 0%, #0a0a0a 60%), radial-gradient(ellipse at 80% 85%, #d44d6e 0%, transparent 50%); }
+  .s3-num { font-size:80px; font-weight:900; color:#c86dd7; line-height:0.85; letter-spacing:-3px; }
+  .s3-unit { font-size:26px; font-weight:700; color:rgba(255,255,255,0.9); margin-bottom:2rem; }
+  .s3-photos { display:flex; gap:0; align-items:flex-start; position:relative; height:220px; width:280px; margin-bottom:1.5rem; }
+  .s3-photos .polaroid:first-child { transform:rotate(-5deg); position:absolute; left:10px; top:0; z-index:1; }
+  .s3-photos .polaroid:last-child  { transform:rotate(4deg);  position:absolute; right:10px; top:20px; z-index:2; }
+  .s3-photos .polaroid img, .s3-photos .polaroid-placeholder { width:140px; height:140px; }
+
+  /* SLIDE 4 */
+  .s4-bg { background: radial-gradient(ellipse at 30% 60%, #1c3f6e 0%, #0a0a0a 65%), radial-gradient(ellipse at 80% 20%, #6c2bd9 0%, transparent 50%); }
+  .s4-label { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:2.5rem; }
+  .counter-block { display:flex; flex-direction:column; align-items:center; gap:1.4rem; width:100%; }
+  .counter-row { display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .counter-num { font-size:64px; font-weight:900; letter-spacing:-2px; line-height:1; }
+  .counter-unit { font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.45); }
+  .counter-arrow { font-size:22px; color:rgba(255,255,255,0.3); line-height:1; }
+  .c-hours { color:#6eb5ff; } .c-mins { color:#c86dd7; } .c-secs { color:#ff6bb5; }
+
+  /* SLIDE 5 */
+  .s5-bg { background: radial-gradient(ellipse at 40% 30%, #3d1c0a 0%, #0a0a0a 65%), radial-gradient(ellipse at 70% 80%, #1a0d3d 0%, transparent 55%); }
+  .timeline-title { font-size:26px; font-weight:900; color:#fff; align-self:flex-start; margin-bottom:1.5rem; }
+  .timeline-scroll { flex:1; overflow-y:auto; width:100%; -webkit-overflow-scrolling:touch; padding-bottom:2rem; }
+  .timeline-scroll::-webkit-scrollbar { display:none; }
+  .timeline { position:relative; padding-left:28px; width:100%; }
+  .timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:1px; background:linear-gradient(to bottom,#c86dd7,#6eb5ff,#1db954,#ff6bb5); opacity:0.5; }
+  .tl-item { display:flex; gap:14px; margin-bottom:24px; position:relative; }
+  .tl-dot { position:absolute; left:-22px; top:6px; width:10px; height:10px; border-radius:50%; background:#c86dd7; border:2px solid #0a0a0a; flex-shrink:0; }
+  .tl-content { flex:1; }
+  .tl-date { font-size:11px; letter-spacing:0.12em; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:4px; }
+  .tl-text { font-size:15px; color:rgba(255,255,255,0.85); line-height:1.45; font-weight:500; }
+  .tl-photo-wrap { margin-top:8px; }
+  .tl-photo-wrap .polaroid img, .tl-photo-wrap .polaroid-placeholder { width:120px; height:120px; }
+
+  /* SLIDE 6 — Céu astronômico */
+  .s6-bg { background: radial-gradient(ellipse at 50% 50%, #080e22 0%, #0a0a0a 80%); }
+  .sky-title { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.5rem; text-align:center; }
+  .sky-date { font-size:17px; font-weight:700; color:#fff; text-align:center; margin-bottom:1.2rem; }
+
+  #sky-svg-wrap { width:300px; height:300px; position:relative; margin-bottom:1.2rem; }
+  #sky-svg-wrap svg { width:100%; height:100%; }
+
+  .sky-facts { display:flex; gap:1.2rem; margin-bottom:1rem; }
+  .sky-fact { display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .sky-fact-icon { font-size:20px; line-height:1; }
+  .sky-fact-label { font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.35); }
+  .sky-fact-val { font-size:13px; font-weight:600; color:rgba(255,255,255,0.85); }
+  .sky-caption { font-size:12px; color:rgba(255,255,255,0.35); text-align:center; line-height:1.6; max-width:270px; }
+
+  /* SLIDE 7 */
+  .s7-bg { background: radial-gradient(ellipse at 50% 40%, #0f3d1a 0%, #0a0a0a 65%); }
+  .s7-label { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:0.6rem; }
+  .s7-title { font-size:22px; font-weight:900; color:#fff; text-align:center; margin-bottom:0.3rem; }
+  .s7-sub { font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:2rem; }
+  .spotify-embed-wrap { width:100%; display:flex; justify-content:center; align-items:center; position:relative; z-index:60; }
+  .spotify-embed-wrap audio { width:300px; border-radius:30px; }
+  .s7-footer { margin-top:1.5rem; font-size:12px; color:rgba(255,255,255,0.3); text-align:center; }
+
+  /* Animations */
+  @keyframes fadeUp  { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes scaleIn { from{opacity:0;transform:scale(0.88)}       to{opacity:1;transform:scale(1)} }
+  .anim-fadeup  { animation:fadeUp  0.65s cubic-bezier(0.22,1,0.36,1) both; }
+  .anim-scalein { animation:scaleIn 0.6s  cubic-bezier(0.22,1,0.36,1) both; }
+  .delay-1{animation-delay:0.12s} .delay-2{animation-delay:0.26s}
+  .delay-3{animation-delay:0.42s} .delay-4{animation-delay:0.58s}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="tap-left"></div>
+<div id="tap-right"></div>
+
+<div id="slides">
+
+  <!-- SLIDE 1: Capa -->
+  <div class="slide s1-bg" id="slide-0">
+    <p class="s1-eyebrow anim-fadeup">✦ uma história especial:</p>
+    <h1 class="s1-title anim-fadeup delay-1">A Nossa</h1>
+    <h2 class="s1-subtitle anim-fadeup delay-2">História</h2>
+    <p class="s1-names anim-fadeup delay-3">Andressa &amp; Matheus</p>
+    <div class="anim-scalein delay-3">
+      <div class="polaroid">
+        <img src="./img/01.jpeg" style="width:180px;height:180px;object-fit:cover;">
+      </div>
+    </div>
+    <p class="s1-hint anim-fadeup delay-4">toque para avançar</p>
+  </div>
+
+  <!-- SLIDE 2: Sobre o primeiro beijo -->
+  <div class="slide" id="slide-1" style="background: radial-gradient(ellipse at 40% 30%, #3d0a2e 0%, #0a0a0a 60%), radial-gradient(ellipse at 70% 75%, #1a0a3d 0%, transparent 55%);">
+ 
+    <p class="anim-fadeup" style="font-size:22px; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:2.5rem;">
+      16 de junho de 2015
+    </p>
+ 
+    <p class="anim-fadeup delay-1" style="font-size:52px; line-height:1; font-weight:900; color:#fff; text-align:center; margin-bottom:0.3rem;">
+      Quando
+    </p>
+    <p class="anim-fadeup delay-1" style="font-size:52px; line-height:1; font-weight:900; text-align:center; background:linear-gradient(90deg,#ff6bb5,#c86dd7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:3rem;">
+      tudo começou.
+    </p>
+ 
+    <p class="anim-fadeup delay-2" style="font-size:16px; color:rgba(255,255,255,0.6); text-align:center; line-height:1.75; max-width:280px; margin-bottom:3rem;">
+      No dia demos o nosso primeiro beijo.<br>
+      Esse presente é a forma que encontrei<br>
+      de te mostrar o quão importante<br>
+      você é na minha vida.
+    </p>
+ 
+    <p class="anim-fadeup delay-3" style="font-size:13px; color:rgba(255,255,255,0.2); letter-spacing:0.1em;">
+      — Matheus
+    </p>
+  
+  <!-- SLIDE 3: Céu de Belém — dados astronômicos reais -->
+  </div>
+  <div class="slide s6-bg" id="slide-5">
+    <p class="sky-title anim-fadeup">o céu em belém naquela noite</p>
+    <p class="sky-date anim-fadeup delay-1">16 de junho de 2015 · 23h00 BRT</p>
+ 
+    <div id="sky-svg-wrap" class="anim-scalein delay-2">
+      <!-- SVG gerado por JS abaixo -->
+    </div>
+ 
+    <div class="sky-facts anim-fadeup delay-3">
+      <div class="sky-fact">
+        <span class="sky-fact-icon">🌑</span>
+        <span class="sky-fact-label">Fase da Lua</span>
+        <span class="sky-fact-val">Lua Nova</span>
+      </div>
+      <div class="sky-fact">
+        <span class="sky-fact-icon">💡</span>
+        <span class="sky-fact-label">Iluminação</span>
+        <span class="sky-fact-val">0,4%</span>
+      </div>
+      <div class="sky-fact">
+        <span class="sky-fact-icon">⭐</span>
+        <span class="sky-fact-label">Visibilidade</span>
+        <span class="sky-fact-val">Excelente</span>
+      </div>
+    </div>
+ 
+    <p class="sky-caption anim-fadeup delay-4">
+      Se eu conseguisse tirar os olhos de você<br>
+      para olharmos um pouco para o céu, era isso<br>
+      o que veríamos naquela noite. 🪐
+    </p>
+  </div>
+
+  <!-- SLIDE 4: Dias juntos -->
+  <div class="slide s2-bg" id="slide-1">
+    <p class="s2-label anim-fadeup">desde o nosso primeiro beijo são</p>
+    <p class="s2-count anim-fadeup delay-1" id="dias-count">—</p>
+    <p class="s2-unit anim-fadeup delay-2">dias juntos</p>
+    <p class="s2-since anim-fadeup delay-3">16 de junho de 2015 · Belém, PA</p>
+    <div class="anim-scalein delay-3" style="margin-top:1.5rem;">
+      <div class="polaroid">
+        <img src="./img/02.jpg" style="width:160px;height:160px;object-fit:cover;">
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Estações -->
+  <div class="slide s3-bg" id="slide-2">
+    <p class="s2-label anim-fadeup" style="color:rgba(255,255,255,0.5);">juntos vivemos</p>
+    <p class="s3-num anim-fadeup delay-1" id="estacoes-count">—</p>
+    <p class="s3-unit anim-fadeup delay-2">estações</p>
+    <div class="s3-photos anim-scalein delay-3">
+      <div class="polaroid">
+        <img src="./img/03.jpeg" style="width:140px;height:140px;object-fit:cover;">
+      </div>
+      <div class="polaroid">
+        <img src="./img/04.jpeg" style="width:140px;height:140px;object-fit:cover;">
+      </div>
+    </div>
+    <p class="s2-since anim-fadeup delay-4" style="color:rgba(255,255,255,0.4);">de alegrias, aventuras e amor</p>
+  </div>
+
+  <!-- SLIDE 6: Contador -->
+  <div class="slide s4-bg" id="slide-3">
+    <p class="s4-label anim-fadeup">tempo de história</p>
+    <div class="counter-block">
+      <div class="counter-row anim-fadeup delay-1">
+        <span class="counter-num c-hours" id="horas-count">—</span>
+        <span class="counter-unit">horas</span>
+      </div>
+      <div class="counter-arrow anim-fadeup delay-2">›</div>
+      <div class="counter-row anim-fadeup delay-2">
+        <span class="counter-num c-mins" id="mins-count">—</span>
+        <span class="counter-unit">minutos</span>
+      </div>
+      <div class="counter-arrow anim-fadeup delay-3">›</div>
+      <div class="counter-row anim-fadeup delay-3">
+        <span class="counter-num c-secs" id="secs-count">—</span>
+        <span class="counter-unit">segundos</span>
+      </div>
+    </div>
+    <p class="s4-label anim-fadeup delay-4" style="margin-top:2rem;">desde 16/06/2015</p>
+  </div>
+
+  <!-- SLIDE 7: Linha do tempo -->
+  <div class="slide s5-bg" id="slide-4" style="justify-content:flex-start;padding-top:4rem;">
+    <p class="timeline-title anim-fadeup">Nossa jornada</p>
+    <div class="timeline-scroll">
+      <div class="timeline">
+
+        <!-- 2013 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">2013</p>
+            <p class="tl-text">Nos conhecemos. </p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/05.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jan 2015 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">24 Jan 2015</p>
+            <p class="tl-text">Tivemos uma conquista juntos.</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/06.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 16/06/2015 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">16 Jun 2015</p>
+            <p class="tl-text">Quando demos o nosso primeiro beijo. 💋</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/07.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 16/08/2015 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1db954;"></div>
+          <div class="tl-content">
+            <p class="tl-date">16 Ago 2015</p>
+            <p class="tl-text">Finalmente o pedido de namoro. 💚 (Não teve foto)</p>
+            
+          </div>
+        </div>
+
+        <!-- 2016 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">2016</p>
+            <p class="tl-text">Pouca foto, muita vida.</p>
+          </div>
+        </div>
+
+        <!-- abr 2017 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2017</p>
+            <p class="tl-text">A nossa primeira viagem juntos — Fortaleza. 🌊</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/08.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- fev 2018 -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Fev 2018</p>
+            <p class="tl-text">A nossa primeira viagem internacional — Colômbia. 🇨🇴</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/09.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ago 2018 Chile -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Ago 2018</p>
+            <p class="tl-text">Chile. 🇨🇱</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/10.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ago 2018 Hunter -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1db954;"></div>
+          <div class="tl-content">
+            <p class="tl-date">19 Ago 2018</p>
+            <p class="tl-text">O Hunter chegou. 🐾</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/11.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- out 2018 Amora -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Out 2018</p>
+            <p class="tl-text">E logo a Amora veio também. 🐾</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/12.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 17/02/2019 Ed Sheeran -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">17 Fev 2019</p>
+            <p class="tl-text">Quando fomos ver o Ed Sheeran ao vivo. 🎸</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/13.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 02/2019 Sul -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Fev 2019</p>
+            <p class="tl-text">Florianópolis.</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/14.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- out 2019 Portugal -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Out 2019</p>
+            <p class="tl-text">Quando você cruzou o oceano para me encontrar pela primeira vez. 🇵🇹</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/15.png" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- nov 2019 Navio -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Nov 2019</p>
+            <p class="tl-text">Você embarcou. ⚓</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/16.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ago 2020 Manaus -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1db954;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Ago 2020</p>
+            <p class="tl-text">Manaus.</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/17.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- fev 2021 pedido -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">16 Fev 2021</p>
+            <p class="tl-text">Pedido de casamento. 💍</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/18.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mai 2021 Portugal -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mai 2021</p>
+            <p class="tl-text">Portugal round 2. 🇵🇹</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/20.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- nov 2021 Sevilha -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Nov 2021</p>
+            <p class="tl-text">Sevilha. 💃</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/21.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jan 2022 Braga -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1db954;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jan 2022</p>
+            <p class="tl-text">Braga. 🏛️</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/22.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jan 2022 Nazaré -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jan 2022</p>
+            <p class="tl-text">Nazaré. 🌊</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/23.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- abr 2022 ensaio -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2022</p>
+            <p class="tl-text">O nosso ensaio. 📷</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/24.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- abr 2022 ensaio -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2022</p>
+            <p class="tl-text">Não dava para escolher só uma. 📷</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/25.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- abr 2022 ensaio -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2022</p>
+            <p class="tl-text">Então toma 3. 📷</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/26.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 06/08/2022 casamento -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">6 Ago 2022</p>
+            <p class="tl-text">O dia das nossas vidas. ❤️</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/27.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 06/08/2022 casamento -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">6 Ago 2022</p>
+            <p class="tl-text">Também não podia ter uma só. ❤️</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/28.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- set 2022 lua de mel -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Set 2022</p>
+            <p class="tl-text">Lua de mel — Malta. 🏝️</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/29.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- abr 2023 Marrocos -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2023</p>
+            <p class="tl-text">Marrocos. 🇲🇦</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/30.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jun 2023 Roma -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jun 2023</p>
+            <p class="tl-text">Roma. 🇮🇹</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/31.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jun 2023 Vaticano -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jun 2023</p>
+            <p class="tl-text">Vaticano. 🇻🇦</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/32.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jun 2023 Albânia -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jun 2023</p>
+            <p class="tl-text">Albânia. 🇦🇱</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/33.jpg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- jun 2023 Grécia -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jun 2023</p>
+            <p class="tl-text">Grécia. 🇬🇷</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/34.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ago 2023 casamento Amanda e Enilson -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Ago 2023</p>
+            <p class="tl-text">Voltamos para casar Amanda e Enilson. 💒</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/35.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jun 2024 Portugal -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jun 2024</p>
+            <p class="tl-text">Portugal, round 3? 🇵🇹</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/36.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 19/07/2024 Gelsenkirchen -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1db954;"></div>
+          <div class="tl-content">
+            <p class="tl-date">19 Jul 2024</p>
+            <p class="tl-text">Essa foi uma realização sua ou minha? </p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/37.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ago 2024 Santiago de Compostela -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Ago 2024</p>
+            <p class="tl-text">Santiago de Compostela. ⛪</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/38.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- set 2024 Londres -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Set 2024</p>
+            <p class="tl-text">Londres. 🇬🇧</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/39.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- out 2024 pais em PT -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Out 2024</p>
+            <p class="tl-text">Os seus pais vieram nos visitar em Portugal. 🇵🇹</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/40.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- out 2024 Hunter e Amora em PT -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Out 2024</p>
+            <p class="tl-text">E trouxeram dois presentões. 🐾🐾</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/41.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mar 2025 neve -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mar 2025</p>
+            <p class="tl-text">Que foram até conhecer a neve. ❄️</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/42.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- abr 2025 Amigos A&H -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6eb5ff;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2025</p>
+            <p class="tl-text">E fizeram mais amigos que a gente. 👨‍👩‍👧‍👦</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/43.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jun 2025 Brasil -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1db954;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jun 2025</p>
+            <p class="tl-text">Finalmente voltamos. 🇧🇷</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/44.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mar 2026 Manuela -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Jul 2025</p>
+            <p class="tl-text">Conhecemos a Manuela. 👶</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/45.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mar 2026 batizado -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#c86dd7;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mar 2026</p>
+            <p class="tl-text">E viramos padrinhos. 🙏</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/46.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mar 2026 aventura -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mar 2026</p>
+            <p class="tl-text">Você embarca em mais uma aventura. 🚤</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/47.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- abr 2026 emprego -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffd580;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Abr 2026</p>
+            <p class="tl-text">E conquista como ninguém. 🎉</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/48.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mai 2026 Côte d'Azur e Cracóvia -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mai 2026</p>
+            <p class="tl-text">Dessa vez sou eu que atravesso o oceano para te encontrar. 🇫🇷</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/49.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mai 2026 Cracóvia -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mai 2026</p>
+            <p class="tl-text">E fomos passar um fim de semana na Cracóvia. 🇵🇱</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/50.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- mai 2026 Côte d'Azur e Cracóvia -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ff6bb5;"></div>
+          <div class="tl-content">
+            <p class="tl-date">Mai 2026</p>
+            <p class="tl-text">Sorte a minha ter você ao meu lado! ❤️</p>
+            <div class="tl-photo-wrap">
+              <div class="polaroid">
+                <img src="./img/51.jpeg" style="width:120px;height:120px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- vem aí -->
+        <div class="tl-item">
+          <div class="tl-dot" style="background:rgba(255,255,255,0.2); border:2px dashed rgba(255,255,255,0.3);"></div>
+          <div class="tl-content">
+            <p class="tl-date" style="color:rgba(255,255,255,0.25);">... vem mais por aí</p>
+            <p class="tl-text" style="color:rgba(255,255,255,0.25); font-style:italic;">a história continua. 🌟</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Spotify -->
+  <div class="slide s7-bg" id="slide-6">
+    <p class="s7-label anim-fadeup">E para terminar</p>
+    <p class="s7-title anim-fadeup delay-1">Uma canção especial</p>
+    <p class="s7-sub anim-fadeup delay-2">Taylor Swift me perdoe, mas esse mashup agora é nosso</p>
+    <div class="spotify-embed-wrap anim-scalein delay-2">
+      <audio controls src="./musica.mp3"></audio>
+    </div>
+    <p class="s7-footer anim-fadeup delay-3">com todo o meu amor — Matheus</p>
+  </div>
+
+</div><!-- /slides -->
+
+<script>
+/* ══════════════════════════════════════════════
+   DATAS — fuso fixo: 16/06/2015 23h BRT = UTC-3
+   Usando offset explícito -03:00 para clareza
+══════════════════════════════════════════════ */
+const PRIMEIRO_BEIJO = new Date('2015-06-16T23:00:00-03:00');
+
+function actualizaContadores() {
+  const ms = new Date() - PRIMEIRO_BEIJO;
+
+  const dias     = Math.floor(ms / (1000 * 60 * 60 * 24));
+  const estacoes = Math.floor(ms / (1000 * 60 * 60 * 24 * 91.3125));
+  const horas    = Math.floor(ms / (1000 * 60 * 60));
+  const mins     = Math.floor(ms / (1000 * 60));
+  const secs     = Math.floor(ms / 1000);
+
+  document.getElementById('dias-count').textContent     = dias.toLocaleString('pt-BR');
+  document.getElementById('estacoes-count').textContent = estacoes;
+  document.getElementById('horas-count').textContent    = horas.toLocaleString('pt-BR');
+  document.getElementById('mins-count').textContent     = mins.toLocaleString('pt-BR');
+  document.getElementById('secs-count').textContent     = secs.toLocaleString('pt-BR');
+}
+
+/* Corre imediatamente e depois a cada segundo */
+actualizaContadores();
+setInterval(actualizaContadores, 1000);
+
+/* ══════════════════════════════════════════════
+   CÉU ASTRONÔMICO — dados reais de 16/06/2015
+   Belém, PA · 1°27'S 48°29'W · 23h00 BRT
+
+   Fontes verificadas:
+   - Lua: Lua Nova, 0,4% iluminação, 0.6 dias (phasesmoon.com / moongiant.com)
+   - Vênus + Júpiter: visíveis juntos no oeste após o pôr do sol (earthsky.org / freestarcharts.com)
+   - Saturno: oposição em 23/mai, visível a noite toda, em Libra (freestarcharts.com)
+   - Mercúrio: próximo ao horizonte oeste, elongação máxima em 24/jun
+   - Constelações visíveis às 23h de Belém em junho:
+     Escorpião (SE), Sagitário (S/SE), Libra (S), Centauro (S),
+     Cruz do Sul (S/SW), Hydra (W), Leo (W), Virgo (W)
+   - A Lua Nova estava a ~7° do Sol, invisível — sem lua no céu
+══════════════════════════════════════════════ */
+(function buildSky() {
+  /* ══════════════════════════════════════════════
+     Posições calibradas a partir do Stellarium Web
+     Belém, PA · 16/06/2015 · 23:27 BRT
+     Projeção: sul no TOPO (hemisfério sul), norte em baixo
+     az=0 N, 90 L, 180 S, 270 O — alt: 0 horizonte, 90 zénite
+  ══════════════════════════════════════════════ */
+  const wrap = document.getElementById('sky-svg-wrap');
+  const W = 300, H = 300, CX = 150, CY = 150, R = 140;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+  grad.id = 'skyGrad';
+  grad.innerHTML = `
+    <stop offset="0%"   stop-color="#0c1830"/>
+    <stop offset="55%"  stop-color="#06101e"/>
+    <stop offset="100%" stop-color="#020810"/>`;
+  const clip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+  clip.id = 'skyClip';
+  clip.innerHTML = `<circle cx="${CX}" cy="${CY}" r="${R}"/>`;
+  defs.appendChild(grad); defs.appendChild(clip);
+  svg.appendChild(defs);
+
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  bg.setAttribute('cx', CX); bg.setAttribute('cy', CY);
+  bg.setAttribute('r', R); bg.setAttribute('fill', 'url(#skyGrad)');
+  svg.appendChild(bg);
+
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('clip-path', 'url(#skyClip)');
+
+  /* Projeção azimutal equidistante — sul no topo */
+  function skyPos(az, alt) {
+    const azRad = (az + 180) * Math.PI / 180;
+    const dist  = (1 - alt / 90) * R * 0.95;
+    return { x: CX + dist * Math.sin(azRad), y: CY - dist * Math.cos(azRad) };
+  }
+
+  function addStar(az, alt, r, opacity, color) {
+    const p = skyPos(az, alt);
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+    c.setAttribute('r', r); c.setAttribute('fill', color || '#ffffff');
+    c.setAttribute('opacity', opacity);
+    g.appendChild(c);
+  }
+
+  function addLabel(az, alt, text, color, size, dy) {
+    const p = skyPos(az, alt);
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', p.x); t.setAttribute('y', p.y + (dy || -6));
+    t.setAttribute('fill', color || 'rgba(255,255,255,0.55)');
+    t.setAttribute('font-size', size || 9);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-family', 'Inter, system-ui, sans-serif');
+    t.textContent = text;
+    g.appendChild(t);
+  }
+
+  function line(az1,al1,az2,al2,stroke,sw) {
+    const p1=skyPos(az1,al1), p2=skyPos(az2,al2);
+    const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1',p1.x);l.setAttribute('y1',p1.y);
+    l.setAttribute('x2',p2.x);l.setAttribute('y2',p2.y);
+    l.setAttribute('stroke',stroke||'rgba(255,255,255,0.15)');
+    l.setAttribute('stroke-width',sw||0.7);
+    g.appendChild(l);
+  }
+
+  /* ── Via Láctea — faixa de Sagitário (S) cruzando até Escorpião (SE) ──
+     No Stellarium a faixa densa vai do sul até SE/E, diagonal proeminente */
+  const mlkSeeds = [
+    [175,55],[178,50],[182,45],[186,40],[190,35],[194,30],[198,26],[202,22],
+    [172,48],[176,43],[180,38],[184,33],[188,28],[192,24],[196,20],
+    [170,52],[174,46],[179,41],[183,36],[187,31],[191,27],[195,22],
+    [168,56],[173,50],[177,44],[181,39],[185,34],[189,29],[193,25],
+    [165,58],[169,53],[174,47],[178,42],[183,37],[187,32],[191,28],
+    [163,60],[167,55],[171,49],[176,44],[180,39],[184,35],[188,30],
+  ];
+  mlkSeeds.forEach(([az,alt]) => {
+    for (let j=0;j<4;j++) {
+      const daz=az+(Math.random()-0.5)*5, dal=alt+(Math.random()-0.5)*5;
+      addStar(daz,dal, Math.random()*0.9, 0.1+Math.random()*0.22, '#b8ccff');
+    }
+  });
+
+  /* ── Estrelas de fundo por constelação ── */
+  /* Escorpião — SE, visível alto no Stellarium */
+  const sco = [[162,54],[165,52],[168,50],[172,47],[176,44],[180,41],[175,48],
+               [160,50],[158,46],[170,52],[164,44],[167,40],[173,38]];
+  sco.forEach(([az,alt])=>addStar(az,alt,0.7+Math.random()*0.8,0.4+Math.random()*0.5));
+
+  /* Sagitário — S, zona central rica */
+  const sgr=[[184,42],[188,38],[192,35],[196,32],[200,36],[204,33],[190,45],[186,39]];
+  sgr.forEach(([az,alt])=>addStar(az,alt,0.6+Math.random()*0.8,0.35+Math.random()*0.45));
+
+  /* Centauro — S/SW, Alpha Cen região */
+  const cen=[[234,52],[238,56],[242,58],[246,54],[250,50],[244,60],[240,48],[236,44]];
+  cen.forEach(([az,alt])=>addStar(az,alt,0.6+Math.random()*0.7,0.3+Math.random()*0.5));
+
+  /* Cruz do Sul — SSW, baixo-médio */
+  const crx=[[248,36],[252,34],[249,30],[254,32]];
+  crx.forEach(([az,alt])=>addStar(az,alt,1.8,0.9,'#d8eeff'));
+  line(248,36,252,34,'rgba(180,220,255,0.35)',0.8);
+  line(249,38,249,28,'rgba(180,220,255,0.35)',0.8);
+  addLabel(249,26,'Cruz do Sul','rgba(180,210,255,0.5)',8,10);
+
+  /* Libra — SW, onde Saturno está */
+  [[220,42],[225,46],[230,40],[226,38],[222,44]].forEach(([az,alt])=>
+    addStar(az,alt,0.6+Math.random()*0.6,0.3+Math.random()*0.4));
+
+  /* Virgo — WSW, se pondo */
+  [[268,34],[272,38],[276,32],[280,28],[264,36]].forEach(([az,alt])=>
+    addStar(az,alt,0.5+Math.random()*0.7,0.25+Math.random()*0.4));
+
+  /* Boieiro — NNE, Arcturus alto */
+  [[20,50],[16,46],[22,44],[18,52],[24,48]].forEach(([az,alt])=>
+    addStar(az,alt,0.5+Math.random()*0.6,0.25+Math.random()*0.4));
+
+  /* Lyra — NNE, Vega alto */
+  [[30,62],[34,58],[28,60],[32,64]].forEach(([az,alt])=>
+    addStar(az,alt,0.5+Math.random()*0.5,0.25+Math.random()*0.35));
+
+  /* Estrelas espalhadas gerais */
+  const fill=[[50,65],[60,58],[70,52],[80,48],[90,72],[100,68],[110,62],[120,56],
+    [130,50],[40,42],[45,72],[55,36],[65,76],[75,82],[85,32],[95,28],
+    [105,38],[115,44],[125,48],[135,53],[145,57],[10,32],[15,52],[25,62],
+    [35,46],[5,68],[350,62],[345,56],[355,52],[340,44],[8,46],[12,58],
+    [290,25],[295,20],[305,18],[310,22],[315,28],[320,24],[325,30],[330,26]];
+  fill.forEach(([az,alt])=>addStar(az,alt,0.5+Math.random()*0.8,0.2+Math.random()*0.5));
+
+  /* ══ OBJECTOS PRINCIPAIS (do Stellarium) ══ */
+
+  /* VÊNUS — NO, ~38° alt, brilhante, branco-amarelado
+     No Stellarium: lado O/direito do mapa, bem acima do horizonte */
+  const vPos = skyPos(298, 38);
+  const vGlow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  vGlow.setAttribute('cx',vPos.x);vGlow.setAttribute('cy',vPos.y);
+  vGlow.setAttribute('r',9);vGlow.setAttribute('fill','#fffff0');vGlow.setAttribute('opacity','0.1');
+  g.appendChild(vGlow);
+  const vCirc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  vCirc.setAttribute('cx',vPos.x);vCirc.setAttribute('cy',vPos.y);
+  vCirc.setAttribute('r',4.5);vCirc.setAttribute('fill','#fffff8');vCirc.setAttribute('opacity','0.95');
+  g.appendChild(vCirc);
+  addLabel(298,38,'Vênus','rgba(255,255,220,0.8)',9);
+
+  /* JÚPITER — NO, ~34° alt, ligeiramente abaixo e perto de Vênus
+     No Stellarium: mesmo quadrante, levemente inferior */
+  const jPos = skyPos(304, 33);
+  const jGlow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  jGlow.setAttribute('cx',jPos.x);jGlow.setAttribute('cy',jPos.y);
+  jGlow.setAttribute('r',7);jGlow.setAttribute('fill','#ffd07a');jGlow.setAttribute('opacity','0.12');
+  g.appendChild(jGlow);
+  const jCirc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  jCirc.setAttribute('cx',jPos.x);jCirc.setAttribute('cy',jPos.y);
+  jCirc.setAttribute('r',3.8);jCirc.setAttribute('fill','#ffd07a');jCirc.setAttribute('opacity','0.9');
+  g.appendChild(jCirc);
+  addLabel(304,33,'Júpiter','rgba(255,210,120,0.75)',9,12);
+
+  /* SATURNO — centro-sul, ~35° alt, com anel
+     No Stellarium: centro ligeiramente à esquerda */
+  const sPos = skyPos(208, 36);
+  const sGlow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  sGlow.setAttribute('cx',sPos.x);sGlow.setAttribute('cy',sPos.y);
+  sGlow.setAttribute('r',9);sGlow.setAttribute('fill','#e8c87a');sGlow.setAttribute('opacity','0.13');
+  g.appendChild(sGlow);
+  const sCirc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  sCirc.setAttribute('cx',sPos.x);sCirc.setAttribute('cy',sPos.y);
+  sCirc.setAttribute('r',3.5);sCirc.setAttribute('fill','#e8c87a');sCirc.setAttribute('opacity','0.92');
+  g.appendChild(sCirc);
+  const ring = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+  ring.setAttribute('cx',sPos.x);ring.setAttribute('cy',sPos.y);
+  ring.setAttribute('rx','7.5');ring.setAttribute('ry','3');
+  ring.setAttribute('fill','none');ring.setAttribute('stroke','#e8c87a');
+  ring.setAttribute('stroke-width','1.3');ring.setAttribute('opacity','0.65');
+  g.appendChild(ring);
+  addLabel(208,36,'Saturno','rgba(232,200,122,0.8)',9);
+
+  /* ARCTURUS — NNE, muito alto (~52°), cor laranja característica
+     No Stellarium: centro-esquerda, bastante alto */
+  addStar(18, 52, 3.0, 0.95, '#ffb060');
+  addLabel(18, 52, 'Arcturus','rgba(255,176,96,0.75)',9);
+
+  /* VEGA — NNE, alto (~62°), azul-branco brilhante
+     No Stellarium: topo esquerdo */
+  addStar(32, 62, 2.8, 0.95, '#d0e8ff');
+  addLabel(32, 62, 'Vega','rgba(200,225,255,0.7)',9);
+
+  /* ANTARES — SE, ~52° alt, vermelho, coração de Escorpião */
+  addStar(162, 54, 3.2, 0.95, '#ff6644');
+  addLabel(162, 54, 'Antares','rgba(255,100,68,0.7)',9);
+
+  /* ALPHA CENTAURI — S/SSW, ~56° alt */
+  addStar(240, 57, 2.8, 0.95, '#fff8e0');
+  addLabel(240, 57, 'α Cen','rgba(255,248,220,0.6)',8,12);
+
+  /* Horizonte */
+  const horiz = document.createElementNS('http://www.w3.org/2000/svg','line');
+  horiz.setAttribute('x1',CX-R);horiz.setAttribute('y1',CY);
+  horiz.setAttribute('x2',CX+R);horiz.setAttribute('y2',CY);
+  horiz.setAttribute('stroke','rgba(255,255,255,0.07)');horiz.setAttribute('stroke-width','1');
+  g.appendChild(horiz);
+
+  /* Rótulos cardeais */
+  function cardinal(text,az) {
+    const azR=(az+180)*Math.PI/180;
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', CX + R*0.96*Math.sin(azR));
+    t.setAttribute('y', CY - R*0.96*Math.cos(azR) + 4);
+    t.setAttribute('fill','rgba(255,255,255,0.22)');t.setAttribute('font-size','9');
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('font-family','Inter, system-ui, sans-serif');
+    t.textContent=text; g.appendChild(t);
+  }
+  cardinal('N',0); cardinal('L',90); cardinal('S',180); cardinal('O',270);
+
+  /* Borda */
+  const border=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  border.setAttribute('cx',CX);border.setAttribute('cy',CY);border.setAttribute('r',R);
+  border.setAttribute('fill','none');border.setAttribute('stroke','rgba(255,255,255,0.1)');
+  border.setAttribute('stroke-width','1');
+  g.appendChild(border);
+
+  svg.appendChild(g);
+  wrap.appendChild(svg);
+})();
+
+/* ══════════════════════════════════════════════
+   PROGRESS BAR
+══════════════════════════════════════════════ */
+const TOTAL = document.querySelectorAll('.slide').length;
+const pbBar = document.getElementById('progress-bar');
+for (let i = 0; i < TOTAL; i++) {
+  const seg = document.createElement('div');
+  seg.className = 'pb-seg';
+  seg.innerHTML = '<div class="pb-seg-inner"></div>';
+  pbBar.appendChild(seg);
+}
+const segs = pbBar.querySelectorAll('.pb-seg');
+const inners = pbBar.querySelectorAll('.pb-seg-inner');
+
+/* Duração em ms deve bater com a transition do #slides */
+const SLIDE_MS = 550;
+
+/* Define o estado final de cada barra sem animação */
+function setBarInstant(idx, widthPct) {
+  inners[idx].style.transition = 'none';
+  inners[idx].style.width = widthPct + '%';
+}
+
+/* Anima uma barra de 'from' para 'to' em 'dur' ms */
+function animBar(idx, fromPct, toPct, dur, cb) {
+  inners[idx].style.transition = 'none';
+  inners[idx].style.width = fromPct + '%';
+  /* força reflow para o browser registar o ponto de partida */
+  inners[idx].getBoundingClientRect();
+  inners[idx].style.transition = `width ${dur}ms ease`;
+  inners[idx].style.width = toPct + '%';
+  if (cb) setTimeout(cb, dur);
+}
+
+/* ══════════════════════════════════════════════
+   NAVEGAÇÃO
+══════════════════════════════════════════════ */
+let current = 0;
+let animating = false;
+const slidesEl = document.getElementById('slides');
+
+/* Estado inicial — todas as barras a zero */
+inners.forEach(inn => { inn.style.transition = 'none'; inn.style.width = '0%'; });
+
+function goTo(idx) {
+  if (idx < 0 || idx >= TOTAL || animating || idx === current) return;
+  animating = true;
+
+  const prev = current;
+  const next = idx;
+  const goingForward = next > prev;
+
+  slidesEl.style.transform = `translateX(calc(-${next} * 100vw))`;
+
+  setTimeout(() => updateTapZones(next), SLIDE_MS);
+
+  if (goingForward) {
+    for (let i = 0; i < prev; i++)  setBarInstant(i, 100);
+    for (let i = next; i < TOTAL; i++) setBarInstant(i, 0);
+    animBar(prev, 50, 100, SLIDE_MS, () => {
+      animBar(next, 0, 50, 300, () => { animating = false; });
+    });
+  } else {
+    for (let i = 0; i < next; i++)  setBarInstant(i, 100);
+    for (let i = next + 1; i < TOTAL; i++) setBarInstant(i, 0);
+    setBarInstant(next, 100);
+    animBar(prev, 50, 0, SLIDE_MS, () => {
+      animBar(next, 100, 50, 300, () => { animating = false; });
+    });
+  }
+
+  current = next;
+}
+
+const tapLeft  = document.getElementById('tap-left');
+const tapRight = document.getElementById('tap-right');
+
+/* Encurta os tap zones para não cobrir o player de áudio no último slide */
+function updateTapZones(idx) {
+  if (idx !== TOTAL - 1) {
+    tapLeft.style.bottom  = '';
+    tapRight.style.bottom = '';
+    return;
+  }
+  const wrap = document.querySelector('.spotify-embed-wrap');
+  if (!wrap) return;
+  const rect   = wrap.getBoundingClientRect();
+  const margin = 16;
+  const bottom = `${window.innerHeight - rect.top + margin}px`;
+  tapLeft.style.bottom  = bottom;
+  tapRight.style.bottom = bottom;
+}
+
+window.addEventListener('resize', () => updateTapZones(current));
+
+/* Toque inicial — barra 0 começa em 50% */
+inners[0].style.width = '50%';
+
+tapRight.addEventListener('click', () => goTo(current + 1));
+tapLeft.addEventListener('click',  () => goTo(current - 1));
+
+/* Swipe */
+let touchX = null, touchY = null;
+document.addEventListener('touchstart', e => {
+  if (e.target.closest('.spotify-embed-wrap')) return;
+  touchX = e.touches[0].clientX;
+  touchY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  if (touchX === null) return;
+  if (e.target.closest('.spotify-embed-wrap')) { touchX = null; touchY = null; return; }
+  const dx = touchX - e.changedTouches[0].clientX;
+  const dy = touchY - e.changedTouches[0].clientY;
+  if (e.target.closest('.timeline-scroll')) {
+    /* Navega na vertical se o swipe for predominantemente vertical — o scroll da timeline trata o resto */
+    touchX = null; touchY = null; return;
+  }
+  /* Só navega entre slides se o swipe for predominantemente horizontal */
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    goTo(current + (dx > 0 ? 1 : -1));
+  }
+  touchX = null; touchY = null;
+}, { passive: true });
+</script>
+</body>
+</html>
